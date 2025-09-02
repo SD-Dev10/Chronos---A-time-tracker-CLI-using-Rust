@@ -1,0 +1,5 @@
+*.rs linguist-language=Rust
+Cargo.lock linguist-vendored
+*.toml linguist-vendored
+* -linguist-detectable
+*.rs linguist-detectable=true
