@@ -1,35 +1,28 @@
-use crate::add_task::pop_up;
+use crate::redundancy_warning::pop_up;
 use crate::task_ui::run;
-use crate::util::{ App, Task, TaskStatus, Break, BreakStatus };
+use crate::util::{App, Break, BreakStatus, Task, TaskStatus};
 
 use color_eyre::Result;
 
-use crossterm::event::{ self, Event, KeyCode, KeyEventKind };
+use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 
 use ratatui::prelude::*;
 
 use ratatui::text::Span;
 use ratatui::widgets::{
-    Block,
-    BorderType,
-    Borders,
-    Cell,
-    Gauge,
-    List,
-    ListItem,
-    Padding,
-    Paragraph,
-    Row,
-    Table,
+    Block, BorderType, Borders, Cell, Gauge, List, ListItem, Padding, Row, Table,
 };
-use ratatui::{ DefaultTerminal, style::{ Color, Modifier, Style } };
+use ratatui::{
+    style::{Color, Modifier, Style},
+    DefaultTerminal,
+};
 
-use std::time::{ Duration, Instant };
+use std::time::{Duration, Instant};
 use tui_textarea::TextArea;
 
 pub fn run_timer(
     mut terminal: DefaultTerminal,
-    mut app: App
+    mut app: App,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut break_inst = Break::new();
     loop {
@@ -142,10 +135,6 @@ pub fn run_timer(
                 .direction(Direction::Vertical)
                 .constraints(vec![Constraint::Percentage(90), Constraint::Percentage(10)])
                 .split(nested_task_data[1]);
-            let [ongoing, stop] = Layout::horizontal([
-                Constraint::Percentage(99),
-                Constraint::Percentage(1),
-            ]).areas(nested_task_data_productivity[1]);
 
             let task_cells = vec!["[ID]", "[Task Name]", "[Status]"]
                 .iter()
@@ -212,47 +201,52 @@ pub fn run_timer(
                     task.time_spent
                 };
                 let progress_percentage = ((elapsed.as_secs_f64() / 7200.0) * 100.0).min(100.0);
-                let progress = Gauge::default()
-                    .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded))
 
+                let outer = Block::default()
+                    .borders(Borders::ALL)
+                    .title("Task in progress")
+                    .style(Style::new().fg(Color::Rgb(0, 200, 180)))
+                    .padding(Padding::new(2, 2, 0, 0));
+
+                let area = nested_task_data_productivity[1];
+
+                frame.render_widget(outer.clone(), area);
+
+                let inner = outer.inner(area);
+
+                let gauge = Gauge::default()
                     .gauge_style(
                         Style::new()
-                            .fg(Color::Rgb(30, 102, 245))
-                            .on_light_cyan()
+                            .fg(Color::Rgb(30, 102, 245)) // filled (blue)
+                            .on_light_cyan() // unfilled bg
                             .italic()
                             .add_modifier(Modifier::BOLD)
                     )
                     .percent(progress_percentage as u16)
                     .label(format!("{} {:.1}%", task.name, progress_percentage));
 
-                frame.render_widget(
-                    progress.block(
-                        Block::default()
-                            .borders(Borders::ALL)
-                            .title("Task in progress")
-                            .style(Style::new().fg(Color::Rgb(0, 200, 180)))
-                            .padding(Padding::new(2, 2, 0, 0))
-                    ),
+                frame.render_widget(gauge, inner);
 
-                    nested_task_data_productivity[1]
-                );
-
-                // If task is paused → add red strip
                 if matches!(task.status, TaskStatus::Paused) {
-                    let width = nested_task_data_productivity[1].width as f64;
-                    let filled_width = ((progress_percentage / 100.0) * width).round() as u16;
+                    let mut filled = (
+                        (progress_percentage / 100.0) *
+                        (inner.width as f64)
+                    ).round() as u16;
 
-                    // Vertical strip, 1 column wide, full height
+                    if filled > inner.width {
+                        filled = inner.width;
+                    }
+
+                    //let strip_x = if filled == 0 { inner.x } else { inner.x + filled - 1 };
+
                     let red_strip_area = Rect {
-                        x: nested_task_data_productivity[1].x + filled_width.saturating_sub(1),
-                        y: nested_task_data_productivity[1].y,
-                        width: 1,
-                        height: nested_task_data_productivity[1].height,
+                        x: inner.x + filled,
+                        y: inner.y,
+                        width: inner.width - filled,
+                        height: inner.height,
                     };
 
-                    // Fill with red background
                     let red_strip = Block::default().style(Style::default().bg(Color::Red));
-
                     frame.render_widget(red_strip, red_strip_area);
                 }
             } else {

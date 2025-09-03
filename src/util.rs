@@ -1,6 +1,6 @@
-use std::time::{ Duration, Instant };
-use tui_textarea::TextArea;
 use std::collections::HashMap;
+use std::time::{Duration, Instant};
+use tui_textarea::TextArea;
 #[derive(Debug, Clone)]
 pub struct Task {
     pub id: u32,

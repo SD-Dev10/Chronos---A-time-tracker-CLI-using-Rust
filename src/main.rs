@@ -11,7 +11,7 @@ use std::io::stdout;
 mod banner;
 mod task_ui;
 use banner::tui_banner;
-mod add_task;
+mod redundancy_warning;
 mod timer;
 mod util;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
