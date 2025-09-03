@@ -1,28 +1,34 @@
 use crate::redundancy_warning::pop_up;
 use crate::task_ui::run;
-use crate::util::{App, Break, BreakStatus, Task, TaskStatus};
+use crate::util::{ App, Break, BreakStatus, Task, TaskStatus };
 
 use color_eyre::Result;
 
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use crossterm::event::{ self, Event, KeyCode, KeyEventKind };
 
 use ratatui::prelude::*;
 
 use ratatui::text::Span;
 use ratatui::widgets::{
-    Block, BorderType, Borders, Cell, Gauge, List, ListItem, Padding, Row, Table,
+    Block,
+    BorderType,
+    Borders,
+    Cell,
+    Gauge,
+    List,
+    ListItem,
+    Padding,
+    Row,
+    Table,
 };
-use ratatui::{
-    style::{Color, Modifier, Style},
-    DefaultTerminal,
-};
+use ratatui::{ style::{ Color, Modifier, Style }, DefaultTerminal };
 
-use std::time::{Duration, Instant};
+use std::time::{ Duration, Instant };
 use tui_textarea::TextArea;
 
 pub fn run_timer(
     mut terminal: DefaultTerminal,
-    mut app: App,
+    mut app: App
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut break_inst = Break::new();
     loop {
