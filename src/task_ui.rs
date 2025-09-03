@@ -1,23 +1,31 @@
 use crate::redundancy_warning::pop_up;
 use crate::timer::run_timer;
-use crate::util::{App, Break, Task, TaskStatus};
+use crate::util::{ App, Break, Task, TaskStatus };
 
 use color_eyre::Result;
 
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use crossterm::event::{ self, Event, KeyCode, KeyEventKind };
 
 use ratatui::prelude::*;
 use ratatui::text::Span;
 use ratatui::widgets::{
-    Bar, BarChart, BarGroup, Block, BorderType, Borders, Cell, List, ListItem, Padding, Paragraph,
-    Row, Table,
+    Bar,
+    BarChart,
+    BarGroup,
+    Block,
+    BorderType,
+    Borders,
+    Cell,
+    List,
+    ListItem,
+    Padding,
+    Paragraph,
+    Row,
+    Table,
 };
-use ratatui::{
-    style::{Color, Modifier, Style},
-    DefaultTerminal,
-};
+use ratatui::{ style::{ Color, Modifier, Style }, DefaultTerminal };
 
-use std::time::{Duration, Instant};
+use std::time::{ Duration, Instant };
 use tui_textarea::TextArea;
 
 pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn std::error::Error>> {
@@ -30,19 +38,21 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
 
             frame.render_widget(
                 Block::default().style(Style::default().bg(Color::Rgb(10, 14, 32))),
-                layout[0],
+                layout[0]
             );
 
             let task_top = Layout::default()
                 .direction(Direction::Vertical)
                 .margin(0)
-                .constraints(vec![
-                    Constraint::Percentage(10), // Header (not focusable)
-                    Constraint::Percentage(10), // Nav tabs (focusable row 0)
-                    Constraint::Percentage(60), // Task table (focusable row 1)
-                    Constraint::Percentage(10), // Command bar (focusable row 2)
-                    Constraint::Percentage(10), // Footer (focusable row 3)
-                ])
+                .constraints(
+                    vec![
+                        Constraint::Percentage(10), // Header (not focusable)
+                        Constraint::Percentage(10), // Nav tabs (focusable row 0)
+                        Constraint::Percentage(60), // Task table (focusable row 1)
+                        Constraint::Percentage(10), // Command bar (focusable row 2)
+                        Constraint::Percentage(10) // Footer (focusable row 3)
+                    ]
+                )
                 .split(layout[0]);
 
             // HEADER (Not focusable)
@@ -51,9 +61,8 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                 header_cells
                     .iter()
                     .map(|h| Cell::from(*h))
-                    .collect::<Vec<_>>(),
-            )
-            .style(Style::new().fg(Color::Rgb(102, 217, 239)));
+                    .collect::<Vec<_>>()
+            ).style(Style::new().fg(Color::Rgb(102, 217, 239)));
 
             let header_widths = [Constraint::Percentage(90), Constraint::Percentage(10)];
             frame.render_widget(
@@ -62,18 +71,20 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                     .style(Style::new().fg(Color::Rgb(0, 200, 180)))
                     .block(
                         Block::new()
-                            .title(Span::styled(
-                                "Chronos",
-                                Style::new()
-                                    .fg(Color::Rgb(255, 165, 0)) // change title color
-                                    .add_modifier(Modifier::BOLD),
-                            ))
+                            .title(
+                                Span::styled(
+                                    "Chronos",
+                                    Style::new()
+                                        .fg(Color::Rgb(255, 165, 0)) // change title color
+                                        .add_modifier(Modifier::BOLD)
+                                )
+                            )
                             .title_alignment(Alignment::Center)
                             .borders(Borders::ALL)
                             .border_type(ratatui::widgets::BorderType::Plain)
-                            .padding(Padding::new(1, 1, 1, 1)),
+                            .padding(Padding::new(1, 1, 1, 1))
                     ),
-                task_top[0],
+                task_top[0]
             );
 
             //NAVIGATION TABS (Focusable row 0)
@@ -90,34 +101,34 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                     .style(Style::new().fg(Color::Rgb(0, 200, 180)))
                     .borders(Borders::ALL)
                     .border_type(BorderType::Rounded)
-                    .padding(Padding::new(1, 1, 0, 0)),
+                    .padding(Padding::new(1, 1, 0, 0))
             );
             frame.render_widget(&app.textarea, task_layout[0]);
 
             let nav_cells = vec!["[Tasks]", "|", "[Timer]"];
-            let nav_cells_spans: Vec<Span> = nav_cells.iter().map(|h| Span::raw(*h)).collect();
+            let nav_cells_spans: Vec<Span> = nav_cells
+                .iter()
+                .map(|h| Span::raw(*h))
+                .collect();
 
             let nav = Row::new(nav_cells_spans).style(Style::new().fg(Color::Rgb(255, 165, 0)));
 
             frame.render_widget(
-                Table::new(
-                    Vec::<Row>::new(),
-                    [
-                        Constraint::Percentage(5),
-                        Constraint::Percentage(5),
-                        Constraint::Percentage(5),
-                    ],
-                )
-                .header(nav)
-                .style(Style::new().fg(Color::Rgb(0, 200, 180)))
-                .block(
-                    Block::new()
-                        .title("MODES")
-                        .borders(Borders::ALL)
-                        .border_type(ratatui::widgets::BorderType::Plain)
-                        .padding(Padding::new(1, 1, 1, 1)),
-                ),
-                task_layout[1],
+                Table::new(Vec::<Row>::new(), [
+                    Constraint::Percentage(5),
+                    Constraint::Percentage(5),
+                    Constraint::Percentage(5),
+                ])
+                    .header(nav)
+                    .style(Style::new().fg(Color::Rgb(0, 200, 180)))
+                    .block(
+                        Block::new()
+                            .title("MODES")
+                            .borders(Borders::ALL)
+                            .border_type(ratatui::widgets::BorderType::Plain)
+                            .padding(Padding::new(1, 1, 1, 1))
+                    ),
+                task_layout[1]
             );
 
             // TASK TABLE HEADER
@@ -133,8 +144,7 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
 
             let task_header = Row::new(task_cells).style(Style::new().fg(Color::Rgb(255, 165, 0)));
 
-            let task_rows: Vec<Row> = app
-                .tasks
+            let task_rows: Vec<Row> = app.tasks
                 .iter()
                 .enumerate()
                 .map(|(i, task)| {
@@ -152,26 +162,21 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
 
                     let time_str = {
                         let secs = elapsed.as_secs();
-                        format!(
-                            "{:02}:{:02}:{:02}",
-                            secs / 3600,
-                            (secs % 3600) / 60,
-                            secs % 60
-                        )
+                        format!("{:02}:{:02}:{:02}", secs / 3600, (secs % 3600) / 60, secs % 60)
                     };
 
-                    let mut row = Row::new(vec![
-                        Cell::from(task.id.to_string()),
-                        Cell::from(task.name.clone()),
-                        Cell::from(status_str),
-                        Cell::from(time_str),
-                    ]);
+                    let mut row = Row::new(
+                        vec![
+                            Cell::from(task.id.to_string()),
+                            Cell::from(task.name.clone()),
+                            Cell::from(status_str),
+                            Cell::from(time_str)
+                        ]
+                    );
 
                     if Some(i) == app.selected_index {
                         row = row.style(
-                            Style::default()
-                                .fg(Color::Yellow)
-                                .add_modifier(Modifier::BOLD),
+                            Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
                         );
                     }
 
@@ -194,12 +199,12 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                         Block::new()
                             .title("TASKS")
                             .borders(
-                                Borders::TOP | Borders::LEFT | Borders::RIGHT | Borders::BOTTOM,
+                                Borders::TOP | Borders::LEFT | Borders::RIGHT | Borders::BOTTOM
                             )
                             .border_type(ratatui::widgets::BorderType::Plain)
-                            .padding(Padding::new(1, 1, 1, 1)),
+                            .padding(Padding::new(1, 1, 1, 1))
                     ),
-                nested_task_data[0],
+                nested_task_data[0]
             );
 
             //Task-status Panel
@@ -218,38 +223,39 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
 
                 let time_str = {
                     let secs = elapsed.as_secs();
-                    format!(
-                        "{:02}:{:02}:{:02}",
-                        secs / 3600,
-                        (secs % 3600) / 60,
-                        secs % 60
-                    )
+                    format!("{:02}:{:02}:{:02}", secs / 3600, (secs % 3600) / 60, secs % 60)
                 };
 
                 let items = vec![
-                    ListItem::new(format!(
-                        "[TASK DETAILS]
--------------- "
-                    ))
-                    .style(Style::new().fg(Color::Rgb(255, 165, 0))),
-                    ListItem::new(format!("Task: {}", task.name))
-                        .style(Style::new().fg(Color::Yellow)),
-                    ListItem::new(format!("Status: {:?}", task.status))
-                        .style(Style::new().fg(Color::Rgb(0, 200, 83))),
-                    ListItem::new(format!("Time: {}", time_str))
-                        .style(Style::new().fg(Color::Rgb(173, 216, 230))),
+                    ListItem::new(format!("[TASK DETAILS]
+-------------- ")).style(
+                        Style::new().fg(Color::Rgb(255, 165, 0))
+                    ),
+                    ListItem::new(format!("Task: {}", task.name)).style(
+                        Style::new().fg(Color::Yellow)
+                    ),
+                    ListItem::new(format!("Status: {:?}", task.status)).style(
+                        Style::new().fg(Color::Rgb(0, 200, 83))
+                    ),
+                    ListItem::new(format!("Time: {}", time_str)).style(
+                        Style::new().fg(Color::Rgb(173, 216, 230))
+                    )
                 ];
-                let p_pause = Paragraph::new(Text::from(
-                    Span::raw("[Press <P> to Pause a task]")
-                        .style(Style::new().fg(Color::Red))
-                        .add_modifier(Modifier::BOLD),
-                ));
+                let p_pause = Paragraph::new(
+                    Text::from(
+                        Span::raw("[Press <P> to Pause a task]")
+                            .style(Style::new().fg(Color::Red))
+                            .add_modifier(Modifier::BOLD)
+                    )
+                );
 
-                let p_resume = Paragraph::new(Text::from(
-                    Span::raw("[Press <R> to Resume a task]")
-                        .style(Style::new().fg(Color::Rgb(34, 139, 34)))
-                        .add_modifier(Modifier::BOLD),
-                ));
+                let p_resume = Paragraph::new(
+                    Text::from(
+                        Span::raw("[Press <R> to Resume a task]")
+                            .style(Style::new().fg(Color::Rgb(34, 139, 34)))
+                            .add_modifier(Modifier::BOLD)
+                    )
+                );
 
                 //Rendering bar charts
                 let mut bars: Vec<Bar> = Vec::new();
@@ -271,7 +277,7 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                         Bar::default()
                             .value(minutes)
                             .label(Line::from(task.name.as_str()))
-                            .text_value(format!("{minutes}m")),
+                            .text_value(format!("{minutes}m"))
                     );
                 }
                 // Put bars into a group
@@ -294,12 +300,12 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                         Block::new()
                             .title("STATUS")
                             .borders(
-                                Borders::TOP | Borders::LEFT | Borders::RIGHT | Borders::BOTTOM,
+                                Borders::TOP | Borders::LEFT | Borders::RIGHT | Borders::BOTTOM
                             )
                             .border_type(ratatui::widgets::BorderType::Thick)
-                            .padding(Padding::new(2, 2, 1, 1)),
+                            .padding(Padding::new(2, 2, 1, 1))
                     ),
-                    task_status_panel_layout[0],
+                    task_status_panel_layout[0]
                 );
                 frame.render_widget(
                     p_pause
@@ -307,10 +313,10 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                             Block::default()
                                 .title("STATUS")
                                 .borders(Borders::ALL)
-                                .padding(Padding::new(0, 2, 5, 0)),
+                                .padding(Padding::new(0, 2, 5, 0))
                         )
                         .alignment(Alignment::Right),
-                    task_status_panel_layout[0],
+                    task_status_panel_layout[0]
                 );
                 frame.render_widget(
                     p_resume
@@ -318,23 +324,22 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                             Block::default()
                                 .title("STATUS")
                                 .borders(Borders::ALL)
-                                .padding(Padding::new(0, 2, 0, 5)),
+                                .padding(Padding::new(0, 2, 0, 5))
                         )
                         .alignment(Alignment::Right),
-                    task_status_panel_layout[0],
+                    task_status_panel_layout[0]
                 );
                 frame.render_widget(chart, task_status_panel_layout[1]);
             } else {
                 // No task selected → show empty state
-                let list = List::new(vec![ListItem::new("Task list")])
-                    .block(Block::default().title("STATUS").borders(Borders::ALL));
+                let list = List::new(vec![ListItem::new("Task list")]).block(
+                    Block::default().title("STATUS").borders(Borders::ALL)
+                );
 
                 frame.render_widget(list, task_status_panel_layout[0]);
 
                 let stat_list = List::new(vec![ListItem::new("All task Stats")]).block(
-                    Block::default()
-                        .title("ELAPSED TIME BAR GRAPH")
-                        .borders(Borders::ALL),
+                    Block::default().title("ELAPSED TIME BAR GRAPH").borders(Borders::ALL)
                 );
 
                 frame.render_widget(stat_list, task_status_panel_layout[1]);
@@ -342,11 +347,14 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
 
             // COMMAND BAR (Focusable row 2)
             let command_cells = vec!["Command: "];
-            let command_cells_spans: Vec<Span> =
-                command_cells.iter().map(|h| Span::raw(*h)).collect();
+            let command_cells_spans: Vec<Span> = command_cells
+                .iter()
+                .map(|h| Span::raw(*h))
+                .collect();
 
-            let command_header =
-                Row::new(command_cells_spans).style(Style::new().fg(Color::Rgb(102, 217, 239)));
+            let command_header = Row::new(command_cells_spans).style(
+                Style::new().fg(Color::Rgb(102, 217, 239))
+            );
 
             frame.render_widget(
                 Table::new(Vec::<Row>::new(), [Constraint::Percentage(90)])
@@ -357,9 +365,9 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                             .title("COMMAND")
                             .borders(Borders::ALL)
                             .border_type(ratatui::widgets::BorderType::Plain)
-                            .padding(Padding::new(1, 1, 1, 1)),
+                            .padding(Padding::new(1, 1, 1, 1))
                     ),
-                task_top[3],
+                task_top[3]
             );
 
             // FOOTER MENU (Focusable row 3)
@@ -368,35 +376,35 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                 "<UP/DOWN> Move",
                 "<Tab> Focus",
                 "<Enter> Add Task",
-                "<Delete> Delete Task",
+                "<Delete> Delete Task"
             ];
-            let footer_cells_spans: Vec<Span> =
-                footer_cells.iter().map(|h| Span::raw(*h)).collect();
+            let footer_cells_spans: Vec<Span> = footer_cells
+                .iter()
+                .map(|h| Span::raw(*h))
+                .collect();
 
-            let footer =
-                Row::new(footer_cells_spans).style(Style::new().fg(Color::Rgb(255, 165, 0)));
+            let footer = Row::new(footer_cells_spans).style(
+                Style::new().fg(Color::Rgb(255, 165, 0))
+            );
 
             frame.render_widget(
-                Table::new(
-                    Vec::<Row>::new(),
-                    [
-                        Constraint::Percentage(25),
-                        Constraint::Percentage(25),
-                        Constraint::Percentage(25),
-                        Constraint::Percentage(25),
-                        Constraint::Percentage(15),
-                    ],
-                )
-                .header(footer)
-                .style(Style::new().fg(Color::Rgb(0, 200, 180)))
-                .block(
-                    Block::new()
-                        .title("MENU")
-                        .borders(Borders::ALL)
-                        .border_type(ratatui::widgets::BorderType::Plain)
-                        .padding(Padding::new(1, 1, 1, 1)),
-                ),
-                task_top[4],
+                Table::new(Vec::<Row>::new(), [
+                    Constraint::Percentage(25),
+                    Constraint::Percentage(25),
+                    Constraint::Percentage(25),
+                    Constraint::Percentage(25),
+                    Constraint::Percentage(15),
+                ])
+                    .header(footer)
+                    .style(Style::new().fg(Color::Rgb(0, 200, 180)))
+                    .block(
+                        Block::new()
+                            .title("MENU")
+                            .borders(Borders::ALL)
+                            .border_type(ratatui::widgets::BorderType::Plain)
+                            .padding(Padding::new(1, 1, 1, 1))
+                    ),
+                task_top[4]
             );
             if app.show_popup {
                 pop_up(frame);
@@ -438,11 +446,11 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                     KeyCode::Char('P') => {
                         let task_name = app.textarea.lines().join(" ");
                         if !task_name.trim().is_empty() {
-                            if let Some((i, task)) = app
-                                .tasks
-                                .iter_mut()
-                                .enumerate()
-                                .find(|(_, t)| t.name == task_name)
+                            if
+                                let Some((i, task)) = app.tasks
+                                    .iter_mut()
+                                    .enumerate()
+                                    .find(|(_, t)| t.name == task_name)
                             {
                                 match task.status {
                                     TaskStatus::Active => {
@@ -475,8 +483,7 @@ pub fn run(mut terminal: DefaultTerminal, mut app: App) -> Result<(), Box<dyn st
                                 app.focus_textarea = false;
 
                                 // ✅ New task paused immediately → add its break state too
-                                app.breaks
-                                    .insert((app.tasks.len() - 1) as u32, Break::new());
+                                app.breaks.insert((app.tasks.len() - 1) as u32, Break::new());
                             }
                         }
                     }
