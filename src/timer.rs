@@ -237,7 +237,7 @@ pub fn run_timer(
                     let mut filled = (
                         (progress_percentage / 100.0) *
                         (inner.width as f64)
-                    ).round() as u16;
+                    ).floor() as u16;
 
                     if filled > inner.width {
                         filled = inner.width;
@@ -248,7 +248,7 @@ pub fn run_timer(
                     let red_strip_area = Rect {
                         x: inner.x + filled,
                         y: inner.y,
-                        width: inner.width - filled,
+                        width: inner.width.saturating_sub(filled),
                         height: inner.height,
                     };
 
