@@ -112,7 +112,8 @@ src/
 ├── banner.rs   # Branding and philosophy UI
 ├── task.rs     # Task lifecycle and navigation
 ├── timer.rs    # Time tracking, breaks, analytics
-├── main.rs     # Application orchestration
+└── main.rs     # Application orchestration
+
 
 
 ## 🧩 Architecture Philosophy
